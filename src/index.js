@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }))
 
 
-mongoose.connect("mongodb+srv://Yogesh_Mjs:U9bUHeuLxXaOhj4j@cluster0.8e1bd.mongodb.net/ShoppingCart?retryWrites=true&w=majority",
+mongoose.connect("mongodb+srv://Sai0047:rXxgqYKPqwnhcXX7@cluster0.qptsw.mongodb.net/group8Database",
     { useNewUrlParser: true })
     .then(() => console.log("MongoDb is connected"))
     .catch(err => console.log(err))
