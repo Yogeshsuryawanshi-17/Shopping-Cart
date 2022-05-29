@@ -4,7 +4,9 @@ const { uploadFile } = require('../AWS_Upload/aws_s3');
 const { is } = require("express/lib/request");
 
 
-//------------------ CREATING PRODUCT
+//------------------ CREATING PRODUCT-------------------------------------------------//
+
+
 const createProduct = async (req, res) => {
     try {
 
@@ -66,6 +68,7 @@ const createProduct = async (req, res) => {
             return res.status(400).send({ status: false, message: `Please Enter Product Price` })
         }
 
+        // console.log(typeof price);
         // Validate the price 
         if (!validator.isValidPrice(price)) {
             return res.status(400).send({ status: false, message: `Please Enter Valid Product Price` })
@@ -96,13 +99,15 @@ const createProduct = async (req, res) => {
             return res.status(400).send({ status: false, message: `Please Enter Valid Product Style` })
         }
 
+        // console.log(validator.isValidSize(availableSizes))
         // Validate the Available Sizes 
         if (availableSizes && !validator.isValidSize(availableSizes)) {
             return res.status(400).send({ status: false, message: `Please Enter Valid Product Available Sizes` })
         }
+        if (availableSizes) availableSizes = validator.isValidSize(availableSizes);
 
         //  Validate Installments
-        if (!validator.isvalidNum(installments)) {
+        if (installments && !validator.isvalidNum(installments)) {
             return res.status(400).send({ status: false, message: `Please Enter Valid Product Installments` })
         }
 
@@ -128,7 +133,18 @@ const createProduct = async (req, res) => {
     }
 };
 
-//------------------ GETTING PRODUCT
+
+
+
+
+
+
+
+
+
+//------------------ GETTING PRODUCT-------------------------------------------------//
+
+
 const getProducts = async (req, res) => {
 
     try {
@@ -137,9 +153,9 @@ const getProducts = async (req, res) => {
         const reqQuery = JSON.parse(JSON.stringify(req.query));
 
         // check query coming or not
-        if (!validator.isValidBody(reqQuery)) {
-            return res.status(400).send({ status: false, msg: "Request Params should not be empty" });
-        }
+        // if (!validator.isValidBody(reqQuery)) {
+        //     return res.status(400).send({ status: false, msg: "Request Params should not be empty" });
+        // }
 
         // Destructure reqQuery
         const { size, name, priceGreaterThan, priceLessThan, priceSort } = reqQuery
@@ -152,7 +168,7 @@ const getProducts = async (req, res) => {
             if (!validator.isValidSize(size)) {
                 return res.status(400).send({ status: false, message: `Please Enter Valid Product Available Sizes` })
             }
-            filters.size = { $in: size };
+            filters.availableSizes = { $in: size };
         }
 
         // Check name is valid or not
@@ -160,7 +176,7 @@ const getProducts = async (req, res) => {
             if (!validator.isValidString(name)) {
                 return res.status(400).send({ status: false, message: `Please Enter Valid Product Name` })
             }
-            filters.name = { $regex: name, $options: "i" } // options for case sensitive and regex is for finding one sentence also
+            filters.title = { $regex: name, $options: "i" } // options for case sensitive and regex is for finding one sentence also
         }
 
 
@@ -184,7 +200,7 @@ const getProducts = async (req, res) => {
                 filter.$lt = priceLessThan
 
             }
-            filters.price = filter;
+            filters.price = filter; // price:{ $gt:greaterPrice, $lt:lessPrice }
         }
 
         // console.log(filters)
@@ -192,15 +208,15 @@ const getProducts = async (req, res) => {
         let sort = {};
         if (priceSort) {
             if (!['-1', '1'].includes(priceSort) || isNaN(priceSort)) {
-                return res.status(400).send({ status: false, message: `Please Enter valid Sorting Field i.e [-1, 1]` })
+                return res.status(400).send({ status: false, message: `Please Enter Valid Sorting Field i.e [-1, 1]` })
             }
             // set that price in sort object above if all ok
             sort.price = priceSort
         }
 
-        // console.log(filters);
+        console.log(filters);
 
-        // Now get products by caaliing in DB
+        // Now get products by calling in DB
         let dataByFilter = await productModel.find(filters).sort(sort)
         res.status(200).send({ status: true, msg: "Products Fetched Successfully", data: dataByFilter });
 
@@ -210,7 +226,17 @@ const getProducts = async (req, res) => {
     }
 };
 
-//------------------ GETTING PRODUCT BY ID
+
+
+
+
+
+
+
+
+//----------------------------------- GETTING PRODUCT BY ID ---------------------------------//
+
+
 const getProductsById = async (req, res) => {
 
     try {
@@ -242,7 +268,18 @@ const getProductsById = async (req, res) => {
     }
 };
 
-//------------------ GETTING PRODUCT BY ID
+
+
+
+
+
+
+
+
+
+
+//------------------ UPDATING PRODUCT BY ID --------------------------------------------------------//
+
 const updateProductById = async (req, res) => {
 
     try {
@@ -263,13 +300,13 @@ const updateProductById = async (req, res) => {
 
         // Validate product ID
         if (!validator.isValidobjectId(productId)) {
-            return res.status(404).send({ status: false, message: "productId not found" });
+            return res.status(404).send({ status: false, message: "Product ID Not Valid" });
         }
 
         // Check product exists or not and should not be deleted
         let product = await productModel.findOne({ _id: productId, isDeleted: false });
         if (!product) {
-            return res.status(404).send({ status: false, message: "product not found or has been deleted" });
+            return res.status(404).send({ status: false, message: "Product Not Found or has been deleted" });
         }
 
         // Destructing request body
@@ -368,7 +405,20 @@ const updateProductById = async (req, res) => {
     }
 };
 
-//------------------ UPDATING CART
+
+
+
+
+
+
+
+
+
+
+
+
+//------------------ DELETING PRODUCT------------------------------------------------------//
+
 const deleteProductById = async (req, res) => {
 
     try {
@@ -397,9 +447,7 @@ const deleteProductById = async (req, res) => {
         return res.status(200).send({ status: true, message: "Product Deleted Successfully", data: deletedProduct })
 
     } catch (err) {
-        return res
-            .status(500)
-            .send({ status: false, message: err.message })
+        return res.status(500).send({ status: false, message: err.message })
     }
 
 };
