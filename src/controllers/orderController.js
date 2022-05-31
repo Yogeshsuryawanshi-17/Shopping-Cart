@@ -1,7 +1,7 @@
 const cartModel = require("../models/cartModel")
 const userModel = require("../models/userModel")
 const OrderModel = require("../models/orderModel")
-
+const validator = require("../validations/validator")
 
 
 

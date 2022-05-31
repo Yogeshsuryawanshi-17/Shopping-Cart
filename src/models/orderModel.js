@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Schema.Types.ObjectId
 
-
 const orderSchema = new mongoose.Schema({
     userId: {
         type: ObjectId,
@@ -20,30 +19,23 @@ const orderSchema = new mongoose.Schema({
         quantity: {
             type: Number,
             required: true,
-            min: 1,
-            trim: true
+            min: 1
         }
     }],
 
     totalPrice: {
         type: Number,
-        required: true,
-        // comment: "Holds total price of all the items in the cart",
-        trim: true
+        required: true
     },
 
     totalItems: {
         type: Number,
         required: true,
-        // comment: "Holds total number of items in the cart",
-        trim: true
     },
 
     totalQuantity: {
         type: Number,
-        required: true,
-        // comment: "Holds total number of items in the cart",
-        trim: true
+        required: true
     },
 
     cancellable: {
