@@ -16,7 +16,7 @@ const createUser = async function (req, res) {
         // const body = req.body.data;
         // const JSONbody = JSON.parse(body)
 
-        //Validate body 
+        // Validate body 
         if (!validator.isValidBody(body)) {
             return res.status(400).send({ status: false, msg: "User body should not be empty" });
         }
@@ -66,6 +66,12 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Invalid email id" })
         }
 
+        // check email is unique or not 
+        const emailExists = await UserModel.findOne({ email: email });
+        if (emailExists) {
+            return res.status(400).send({ status: true, msg: "Email Already Exists!! Please Check with Another" })
+        }
+
         // Validate password
         if (!validator.isValid(password)) {
             return res.status(400).send({ status: false, message: "password must be present" })
@@ -84,6 +90,12 @@ const createUser = async function (req, res) {
         // Validation of phone number
         if (!validator.isValidNumber(phone)) {
             return res.status(400).send({ status: false, msg: "Invalid phone number" })
+        }
+
+        // check phone is unique or not 
+        const phoneExists = await UserModel.findOne({ phone: phone });
+        if (phoneExists) {
+            return res.status(400).send({ status: true, msg: "Phone Number Already Exists!! Please Check with Another" })
         }
 
         address = JSON.parse(address);
@@ -273,7 +285,7 @@ const getUserById = async (req, res) => {
 
 
         //AUTHORISATION
-        if (userId !== req.user.userId) {
+        if (userId !== req.userId) {
             return res.status(401).send({ status: false, msg: "Unauthorised access" })
         }
 
@@ -284,7 +296,7 @@ const getUserById = async (req, res) => {
 
         }
         else {
-            return res.status(200).send({ status: true, msg: "User profile details", data: findUser })
+            return res.status(200).send({ status: true, message: "User profile details", data: findUser })
         }
 
     }
@@ -301,7 +313,8 @@ const getUserById = async (req, res) => {
 const updateUserById = async (req, res) => {
     try {
         // Validate body
-        const body = req.body
+        const body = JSON.parse(JSON.stringify(req.body))
+
         if (!validator.isValidBody(body)) {
             return res.status(400).send({ status: false, msg: "Details must be present to update" })
         }
@@ -318,7 +331,7 @@ const updateUserById = async (req, res) => {
         }
 
         //AUTHORISATION
-        if (userId !== req.user.userId) {
+        if (userId !== req.userId) {
             return res.status(401).send({ status: false, msg: "Unauthorised access" })
         }
 
@@ -377,7 +390,7 @@ const updateUserById = async (req, res) => {
             updatedData['password'] = encrypt
         }
 
-
+        address = JSON.parse(address)
         //Updating the Address
         if (address) {
             if (address.shipping) {
@@ -441,7 +454,7 @@ const updateUserById = async (req, res) => {
             }
         }
         const updated = await UserModel.findOneAndUpdate({ _id: userId }, updatedData, { new: true })
-        return res.status(201).send({ status: true, data: updated })
+        return res.status(200).send({ status: true, message: "User profile updated", data: updated })
     }
     catch (err) {
         console.log("This is the error :", err.message)

@@ -4,7 +4,6 @@ const OrderModel = require("../models/orderModel")
 const validator = require("../validations/validator")
 
 
-
 //------------------  POST /users/:userId/orders -----------------------------------------//
 
 const placeOrder = async (req, res) => {
@@ -28,11 +27,10 @@ const placeOrder = async (req, res) => {
             return res.status(400).send({ status: false, msg: "Invalid parameters" });
         }
 
-
         // // AUTHORISATION
-        // if (userId !== req.user.userId) {
-        //     return res.status(401).send({ status: false, msg: "Unauthorised access" })
-        // }
+        if (userId !== req.userId) {
+            return res.status(401).send({ status: false, msg: "Unauthorised access" })
+        }
 
         const { cartId, cancellable, status, deletedAt, isDeleted } = body
 
@@ -73,7 +71,7 @@ const placeOrder = async (req, res) => {
         }
 
         let createdOrder = await OrderModel.create(order)
-        return res.status(201).send({ status: true, msg: "Success", data: createdOrder })
+        return res.status(201).send({ status: true, message: "Success", data: createdOrder })
     }
     catch (err) {
         console.log("This is the error :", err.message)
@@ -81,18 +79,7 @@ const placeOrder = async (req, res) => {
     }
 };
 
-
-
-
-
-
-
-
-
-
 //------------------ PUT /users/:userId/orders------------------------------------------------//
-
-
 
 const updateOrderById = async (req, res) => {
     try {
@@ -121,9 +108,9 @@ const updateOrderById = async (req, res) => {
         }
 
         // // AUTHORISATION
-        // if (userId !== req.user.userId) {
-        //     return res.status(401).send({ status: false, msg: "Unauthorised access" })
-        // }
+        if (userId !== req.userId) {
+            return res.status(401).send({ status: false, msg: "Unauthorised access" })
+        }
 
         const { orderId, status } = body
 
@@ -177,7 +164,7 @@ const updateOrderById = async (req, res) => {
 
 
         const orderUpdated = await OrderModel.findOneAndUpdate({ _id: orderId }, { status: status }, { new: true })
-        return res.status(200).send({ status: true, msg: "Order updated successfully", data: orderUpdated })
+        return res.status(200).send({ status: true, message: "Success", data: orderUpdated })
 
     }
     catch (err) {
@@ -186,7 +173,6 @@ const updateOrderById = async (req, res) => {
     }
 
 };
-
 
 module.exports = {
     placeOrder,

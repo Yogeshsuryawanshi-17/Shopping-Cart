@@ -97,15 +97,24 @@ const createProduct = async (req, res) => {
             return res.status(400).send({ status: false, message: `Please Enter Valid Product Style` })
         }
 
+        // check availableSizes Coming or not
+        if (!availableSizes || !body.hasOwnProperty("availableSizes")) {
+            return res.status(400).send({ status: false, message: `Please Provide at least One Available Size` })
+        }
+
+        // check type available sizes must be an array
+        if (!Array.isArray(availableSizes)) {
+            return res.status(400).send({ status: false, message: `Available Sizes Must be an Type Of Array` })
+        }
+
         // Validate the Available Sizes 
         if (availableSizes && !validator.isValidSize(availableSizes)) {
             return res.status(400).send({ status: false, message: `Please Enter Valid Product Available Sizes` })
         }
-        if (availableSizes) availableSizes = validator.isValidSize(availableSizes);
 
         //  Validate Installments
-        if (installments && !validator.isvalidNum(installments)) {
-            return res.status(400).send({ status: false, message: `Please Enter Valid Product Installments` })
+        if ((installments) && (!validator.isvalidNum(installments) || (parseInt(installments) < 0))) {
+            return res.status(400).send({ status: false, message: 'Please Enter Valid Installments' })
         }
 
         // Create a new Object and set all things
@@ -117,18 +126,27 @@ const createProduct = async (req, res) => {
             currencyFormat,
             productImage: uploadedFileURL,
             style,
-            availableSizes,
+            availableSizes: validator.isValidSize(availableSizes),
             installments
         }
 
         const newProduct = await productModel.create(finalData);
-        return res.status(201).send({ status: true, message: 'Product Created Successfully', data: newProduct })
+        // return res.status(201).send({ status: true, message: "Product Created Successfully", data: newProduct })
+        return res.status(201).send({ status: true, message: "Success", data: newProduct })
 
     } catch (err) {
         console.log("This is the error : ", err.message)
         res.status(500).send({ msg: "Error", error: err.message })
     }
 };
+
+
+
+
+
+
+
+
 
 
 //------------------ GETTING PRODUCT-------------------------------------------------//
@@ -202,13 +220,24 @@ const getProducts = async (req, res) => {
 
         // Now get products by calling in DB
         let dataByFilter = await productModel.find(filters).sort(sort)
-        res.status(200).send({ status: true, msg: "Products Fetched Successfully", data: dataByFilter });
+        res.status(200).send({ status: true, message: "Success", data: dataByFilter });
 
     } catch (err) {
         console.log("This is the error :", err.message)
         res.status(500).send({ msg: "Error", error: err.message })
     }
 };
+
+
+
+
+
+
+
+
+
+
+
 
 //------------------ GETTING PRODUCT BY ID ---------------------------------//
 const getProductsById = async (req, res) => {
@@ -234,13 +263,21 @@ const getProductsById = async (req, res) => {
             return res.status(400).send({ status: false, message: "Product is deleted" })
         }
 
-        return res.status(200).send({ status: true, message: "Product Fetched Successfully", data: product })
+        return res.status(200).send({ status: true, message: "Success", data: product })
 
     } catch (err) {
         console.log("This is the error :", err.message)
         res.status(500).send({ msg: "Error", error: err.message })
     }
 };
+
+
+
+
+
+
+
+
 
 
 //------------------ UPDATING PRODUCT BY ID --------------------------------------------------------//
@@ -264,7 +301,7 @@ const updateProductById = async (req, res) => {
 
         // Validate product ID
         if (!validator.isValidobjectId(productId)) {
-            return res.status(404).send({ status: false, message: "Product ID Not Valid" });
+            return res.status(400).send({ status: false, message: "Product ID Not Valid" });
         }
 
         // Check product exists or not and should not be deleted
@@ -333,7 +370,7 @@ const updateProductById = async (req, res) => {
         if (availableSizes) {
 
             if (!Array.isArray(availableSizes)) {
-                return res.status(400).send({ status: false, data: "sizes must be an Array" })
+                return res.status(400).send({ status: false, data: "Available Sizes Must be an Type Of Array" })
             }
 
             if (!validator.isValidSize(availableSizes)) {
@@ -380,6 +417,16 @@ const updateProductById = async (req, res) => {
         res.status(500).send({ msg: "Error", error: err.message })
     }
 };
+
+
+
+
+
+
+
+
+
+
 
 //------------------ DELETING PRODUCT------------------------------------------------------//
 const deleteProductById = async (req, res) => {
